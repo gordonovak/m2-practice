@@ -16,6 +16,19 @@
 needsPackage "InvariantRing"
 
 
+
+
+
+Interations = (n, m) -> (
+    apply(subsets(toList(0..n-1), m), S -> (
+        v = for i to n-1 list 0;
+        scan(S, i -> v#i = 1);
+        v
+    ))
+)
+
+
+
 --  METHOD_NAME: AbelianGroupSkewInvariants
 --      INPUT: (W, R)
 --          * W is a finite abelian group
@@ -43,6 +56,10 @@ AbelianGroupSkewInvariants = (W,R,p) -> (
     -- Now we make a list of the vectors we want to track
     a_vectors := {};
     -- Loop through the entire weight matrix
+
+
+    -- Heyo
+
     for i from 0 to numColumns M - 1 do (
         -- Sum the entries and check if they're less than m
         if sum entries W_{:, i} <= m then (
