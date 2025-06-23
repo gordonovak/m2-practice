@@ -1,25 +1,67 @@
-AbelianGroupSkewInvariants = (W,R) -> (
-    -- W is a finite abelian group
-    -- R is a ring
-    -- Returns the invariants of W over R
-    
+--  CREDITS  --
+--  Advisor: Francesca Gandini
+--  Theory: Sumner Strom & Marcus Cassel
+--  Psuedocode: Sumner Strom
+--      * Last Editied 06/23/24
+--  Code: Gordon Novak
+--      * Last Editied 06/23/24
+
+-- //////////////// --
+-- //////////////// --
+-- CODE STARTS HERE
+-- //////////////// --
+-- //////////////// --
+
+--  We require the invariantRing package for serveral functions
+needsPackage "InvariantRing"
+
+
+--  METHOD_NAME: AbelianGroupSkewInvariants
+--      INPUT: (W, R)
+--          * W is a finite abelian group
+--          * R is a ring
+--      OUTPUT: List
+--          * List of the invariants of W over R
+AbelianGroupSkewInvariants = (W,R,p) -> (
+
     -- Check if W is a finite abelian group
-    if not isFiniteAbelianGroup(W) then (
-        error "W must be a finite abelian group"
-    );
-    
-    -- Compute the invariants
-    invariants = {};
-    for j from 1 to 2^(numgens R) do (
-        k = vector j; -- make a vector base 2 of j with numgens R entries for all of the powers there can be in the skew setting
-        for i from 1 to rank(W) do (
-            v = vector row i W; -- get the i-th row of the group
-            if (v * k)%rank(W) == 0 then (
-                invariants = append(invariants, k);
-            );
-        );
+    if not isAbelian W then (
+        print "ERR: Group must be abelian.";
+        return {};
+    )
+    if not isFinite W then (
+        print "ERR: Group must be finite.";
+        return {};
     )
     
-    
-    return invariants;
+    -- First, we make an empty list of the invariants
+    invariants = {};
+
+    -- Then, we establish the maximum number of tests we need to do for every polynomial. We set this value to m.
+    m := min(order W, numgens R);
+
+    -- Now we make a list of the vectors we want to track
+    a_vectors := {};
+    -- Loop through the entire weight matrix
+    for i from 0 to numColumns M - 1 do (
+        -- Sum the entries and check if they're less than m
+        if sum entries W_{:, i} <= m then (
+            -- Then we iterate through our weight matrix again
+
+            addit := true;
+            for k from 0 to numRows M - 1 do (
+                if not (W_{k,:} * W_{:, i} % p == 0) do {
+                    addit := false;
+                }
+            );
+
+            if addit do {
+                a_vectors = a_vectors | W_{:, i};
+            }
+        );
+    );
+
+    grobussy := groebnerBasis(a_vectors);
+
+    return grobussy;
 );
