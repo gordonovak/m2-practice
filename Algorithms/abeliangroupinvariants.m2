@@ -30,7 +30,7 @@ Z2VectorGenerator = (n, m) -> (
     apply(
         -- We make a set of all subsets of possible index positions for our 1 entries in every vector of size m (stored in "S")
         subsets(toList(0..n-1), m), 
-        -- Then, we create a function to update a vector "v" with all the corect entries
+        -- Then, we create a function to update a vector "v" with all the correct entries
         S -> (
             -- Creates a new mutable v (so we can change it)
             v := new MutableList;
@@ -50,7 +50,7 @@ Z2VectorGenerator = (n, m) -> (
 
 
 -- METHOD_NAME: Z2ComprehensiveVectorGenerator
--- USAGE: Generates a list with all Z2 vectors of length n with m or fewer 1 entries. 
+-- USAGE: Generates a list with all Z2 vectors of length n with m or fewer entries. 
 --      INPUT: 
 --          * n : length of vector
 --          * m : number of entries
@@ -75,6 +75,15 @@ Z2ComprehensiveVectorGenerator = (n, m) -> (
 --          * R is a ring
 --      OUTPUT: List
 --          * List of the invariants of W over R
+
+
+R = QQ[x..z];
+numgens R
+m = 3
+a_vectors = Z2ComprehensiveVectorGenerator(numgens R, m)
+
+zeroVec = for i to 4 list 0
+
 AbelianGroupSkewInvariants = (W,R,p) -> (
 
     -- Check if W is a finite abelian group
@@ -93,32 +102,34 @@ AbelianGroupSkewInvariants = (W,R,p) -> (
     -- Then, we establish the maximum number of tests we need to do for every polynomial. We set this value to m.
     m := min(order W, numgens R);
 
-    -- Now we make a list of the vectors we want to track
-    a_vectors := {};
+    -- Now we make a list of the Z2 vectors
+    numgens R
+    a_vectors = Z2ComprehensiveVectorGenerator(numgens R, m)
     -- Loop through the entire weight matrix
 
-
-    -- Heyo
-
-    for i from 0 to numColumns M - 1 do (
-        -- Sum the entries and check if they're less than m
-        if sum entries W_{:, i} <= m then (
-            -- Then we iterate through our weight matrix again
-
-            addit := true;
-            for k from 0 to numRows M - 1 do (
-                if not (W_{k,:} * W_{:, i} % p == 0) do {
-                    addit := false;
-                }
-            );
-
-            if addit do {
-                a_vectors = a_vectors | W_{:, i};
-            }
+    -- Create a zero vector to compare our results to.
+    zeroVec = for i to (numColumns W)-1 list 0;
+    -- Create a list of all the generators of r
+    varList = gens R;
+    -- Then we run through all the a_vectors
+    for x in a_vectors do (
+        -- Then, we check if the multiplication results in the zeroVector. If it is, then we know that the representative polynomial is invarinat. 
+        if (W * x == zeroVec) then (
+            -- First, we create a placeholder variable. Current our invariants are in the form {0, 1, 1, ...} and that won't do.
+            -- Our placeholder will start off as 1 so we can multiply anything to it. 
+            invar = 1;
+            -- Then, we want to get the entryWise product of our a_vector list with our varList. 
+            -- This will turn {0, 1, 1, ...} * {x, y, z, ...} into {0, y, z, ...}.
+            -- Then, we multiply every element in the new list, {0, y, z, ...}, to our invar variable.
+            -- This will update invar to be something like yz..., our invariant polynomial, which we can then add to the invariants list. 
+            for k in (for i to n list a_vectors#i * varList#i) do (invar = invar * k);
+            -- Then we add it to the invariant list. 
+            invariants = invariants | {invar};
         );
     );
 
-    grobussy := groebnerBasis(a_vectors);
+    -- Grobussy
+    grobussy := groebnerBasis(invariants);
 
     return grobussy;
 );
