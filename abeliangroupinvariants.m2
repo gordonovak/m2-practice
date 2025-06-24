@@ -4,7 +4,7 @@
 --  Psuedocode: Sumner Strom
 --      * Last Editied 06/23/24
 --  Code: Gordon Novak
---      * Last Editied 06/23/24
+--      * Last Editied 06/24/24
 
 -- //////////////// --
 -- //////////////// --
@@ -16,17 +16,57 @@
 needsPackage "InvariantRing"
 
 
+-- METHOD_NAME: Z2VectorGenerator
+-- USAGE: Generates a list with all Z2 vectors of length n with m entries. 
+--      INPUT: 
+--          * n : length of vector
+--          * m : number of entries
+--      OUTPUT:
+--          * vecList : all vectors of length n with m entries.
+Z2VectorGenerator = (n, m) -> (
+    -- Make a list to store all the vectors
+    vecList := {};
+    -- Then, we use the apply function to start placing our 1s
+    apply(
+        -- We make a set of all subsets of possible index positions for our 1 entries in every vector of size m (stored in "S")
+        subsets(toList(0..n-1), m), 
+        -- Then, we create a function to update a vector "v" with all the corect entries
+        S -> (
+            -- Creates a new mutable v (so we can change it)
+            v := new MutableList;
+            -- Updates every entry in v to 0
+            for i from 0 to n-1 do (
+                v = append(v, 0);
+            );
+            -- Goes through one of the nested lists of S and updates the proper indecies of v with 1. 
+            scan(S, i -> v#i = 1);
+            -- Appends v to the original vecList (we need to turn v into a regular list first though)
+            vecList = vecList | {toList v};
+        )
+    );
+    -- Finally returns the output. 
+    return vecList;
+);
 
 
-
-Interations = (n, m) -> (
-    apply(subsets(toList(0..n-1), m), S -> (
-        v = for i to n-1 list 0;
-        scan(S, i -> v#i = 1);
-        v
-    ))
+-- METHOD_NAME: Z2ComprehensiveVectorGenerator
+-- USAGE: Generates a list with all Z2 vectors of length n with m or fewer 1 entries. 
+--      INPUT: 
+--          * n : length of vector
+--          * m : number of entries
+--      OUTPUT:
+--          * vecList : all vectors of length n with m or fewer entries.
+Z2ComprehensiveVectorGenerator = (n, m) -> (
+    -- First, we make a list to store everything in.
+    allVec := {};
+    -- Then, we go through every number of entries that we want (from 0 to m)
+    for i from 0 to m do (
+        -- Then, we just append the Z2VectorGenerator function to the allVec function 
+        allVec = allVec | Z2VectorGenerator(n, i);
+    );
+    -- Return the output.. 
+    return allVec;
 )
-
 
 
 --  METHOD_NAME: AbelianGroupSkewInvariants
