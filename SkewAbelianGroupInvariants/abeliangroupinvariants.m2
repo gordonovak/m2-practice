@@ -2,9 +2,11 @@
 --  Advisor: Francesca Gandini
 --  Theory: Sumner Strom & Marcus Cassel
 --  Psuedocode: Sumner Strom
---      * Last Editied 06/23/24
+--      * Last Editied 06/23/25
 --  Code: Gordon Novak
---      * Last Editied 06/24/24
+--      * Last Editied 06/25/25
+--  Review: Sasha Arasha
+--      * Last Reviewed 06/25/25
 
 -- //////////////// --
 -- //////////////// --
@@ -13,7 +15,7 @@
 -- //////////////// --
 
 --  We require the invariantRing package for serveral functions
-needsPackage "InvariantRing"
+needsPackage "InvariantRing";
 
 
 -- METHOD_NAME: Z2VectorGenerator
@@ -74,37 +76,28 @@ Z2ComprehensiveVectorGenerator = (n, m) -> (
 --          * W is a finite abelian group
 --          * R is a ring
 --      OUTPUT: List
---          * List of the invariants of W over R
+--          * List of the invariant of W over R
 
-
-R = QQ[x..z];
-numgens R
-m = 3
-a_vectors = Z2ComprehensiveVectorGenerator(numgens R, m)
-
-zeroVec = for i to 4 list 0
-
-AbelianGroupSkewInvariants = (W,R,p) -> (
-
-    -- Check if W is a finite abelian group
-    if not isAbelian W then (
-        print "ERR: Group must be abelian.";
-        return {};
-    )
-    if not isFinite W then (
-        print "ERR: Group must be finite.";
-        return {};
-    )
+AbelianGroupSkewInvariants := (D1) -> (
     
+    R = ring(D1);
+    D3 = toList weights D1;
+
+    if (D3#0 == 0) then (
+        W = D3#1;
+    ) else (
+        W = D3#0;
+    );
+
+    p = cyclicFactors D1;
     -- First, we make an empty list of the invariants
-    invariants = {};
+    invariantList = {};
 
     -- Then, we establish the maximum number of tests we need to do for every polynomial. We set this value to m.
-    m := min(order W, numgens R);
+    m := min(numgens R, numgens R);
 
     -- Now we make a list of the Z2 vectors
-    numgens R
-    a_vectors = Z2ComprehensiveVectorGenerator(numgens R, m)
+    a_vectors = Z2ComprehensiveVectorGenerator(numgens R, m);
     -- Loop through the entire weight matrix
 
     -- Create a zero vector to compare our results to.
@@ -112,9 +105,25 @@ AbelianGroupSkewInvariants = (W,R,p) -> (
     -- Create a list of all the generators of r
     varList = gens R;
     -- Then we run through all the a_vectors
-    for x in a_vectors do (
+
+    for C in (a_vectors) do (
+        c = matrix {C};
+
+        isZero := true;
         -- Then, we check if the multiplication results in the zeroVector. If it is, then we know that the representative polynomial is invarinat. 
-        if (W * x == zeroVec) then (
+
+        -- We need to multiply our matrix by our vector, and to get our vector into correct matrix form, we need the transpose.
+        D = W * transpose(c);
+        -- Then we iterate through the list
+        for i from 0 to numColumns D do (
+            -- Here is some data manipulation to see if we get nonzero terms. 
+            if not ((flatten entries D)_i) % p_i == 0  then (
+                isZero = false;
+            );
+        );
+
+        -- If it is entirely zero, we know that it is invariant, so we continue. 
+        if (isZero) then (
             -- First, we create a placeholder variable. Current our invariants are in the form {0, 1, 1, ...} and that won't do.
             -- Our placeholder will start off as 1 so we can multiply anything to it. 
             invar = 1;
@@ -122,14 +131,23 @@ AbelianGroupSkewInvariants = (W,R,p) -> (
             -- This will turn {0, 1, 1, ...} * {x, y, z, ...} into {0, y, z, ...}.
             -- Then, we multiply every element in the new list, {0, y, z, ...}, to our invar variable.
             -- This will update invar to be something like yz..., our invariant polynomial, which we can then add to the invariants list. 
-            for k in (for i to n list a_vectors#i * varList#i) do (invar = invar * k);
+            for k in (
+                for i to m - 1 list (C_i * varList#i)) do (
+                    if (k != 0) then (
+                        -- Here we multiply k by our invariant if it is nonzer. 
+                        invar = invar * k;
+                    );
+            );
             -- Then we add it to the invariant list. 
-            invariants = invariants | {invar};
+            invariantList = invariantList | {invar};
         );
     );
 
-    -- Grobussy
-    grobussy := groebnerBasis(invariants);
+    -- Print out the results. 
+    print ("\nPrinting Invariants: ");
+    print invariantList;
 
-    return grobussy;
-);
+    minimalInvariantGeneratorsGröbnerBasis := groebnerBasis(ideal(invariantList));
+    -- We want to return the minimal invariant generators
+    return minimalInvariantGeneratorsGröbnerBasis;
+)
