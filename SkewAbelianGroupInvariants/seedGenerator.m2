@@ -115,8 +115,6 @@ elementaryAbelianPGroupSeedGenerator = (W, p, R) -> (
         moddedCoefficientList = moddedCoefficientList | {modCoef};
     );
 
-
-
     for i from 0 to ((#moddedCoefficientList) - 1) when (i < (#moddedCoefficientList)) do (
         for k from i+1 to ((#moddedCoefficientList) - 1) when (k < (#moddedCoefficientList)) do (
             if (moddedCoefficientList_i == moddedCoefficientList_k) then (
@@ -124,9 +122,6 @@ elementaryAbelianPGroupSeedGenerator = (W, p, R) -> (
             );
         );
     );
-
-
-    
 
     return moddedCoefficientList;
 )
